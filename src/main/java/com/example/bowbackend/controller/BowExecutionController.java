@@ -1,14 +1,19 @@
 package com.example.bowbackend.controller;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.example.bowbackend.constant.Constant;
 import com.example.bowbackend.dto.BowResultDTO;
 import com.example.bowbackend.helper.TextFileToWordExtractor;
 import com.example.bowbackend.service.BowConcurrentOneService;
 import com.example.bowbackend.service.BowConcurrentTwoService;
 import com.example.bowbackend.service.BowSequentialService;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/bow")
