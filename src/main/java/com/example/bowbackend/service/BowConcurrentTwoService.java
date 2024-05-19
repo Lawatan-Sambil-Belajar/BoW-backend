@@ -1,13 +1,16 @@
 package com.example.bowbackend.service;
 
-import com.example.bowbackend.constant.Constant;
-import com.example.bowbackend.dto.BowResultDTO;
-import com.example.bowbackend.dto.ThreadMetricsDTO;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
+
+import com.example.bowbackend.constant.Constant;
+import com.example.bowbackend.dto.BowResultDTO;
+import com.example.bowbackend.dto.ThreadMetricsDTO;
 
 public class BowConcurrentTwoService {
 
@@ -23,7 +26,8 @@ public class BowConcurrentTwoService {
             int start = i;
             int end = Math.min(i + chunkSize, words.length);
 
-            CompletableFuture<Map<String, Integer>> future = CompletableFuture.supplyAsync(() -> processChunk(Arrays.copyOfRange(words, start, end)));
+            CompletableFuture<Map<String, Integer>> future = CompletableFuture
+                    .supplyAsync(() -> processChunk(words, start, end));
             futures.add(future);
         }
 
@@ -61,11 +65,11 @@ public class BowConcurrentTwoService {
                 .build();
     }
 
-    private static Map<String, Integer> processChunk(String[] chunk) {
+    private static Map<String, Integer> processChunk(String[] chunk, int start, int end) {
         long startTime = System.currentTimeMillis();
         Map<String, Integer> frequencyMap = new HashMap<>();
-        for (String word : chunk) {
-            frequencyMap.merge(word, 1, Integer::sum);
+        for (int i = start; i < end; i++) {
+            frequencyMap.merge(chunk[i], 1, Integer::sum);
         }
         String threadName = Thread.currentThread().getName();
         long endTime = System.currentTimeMillis();
