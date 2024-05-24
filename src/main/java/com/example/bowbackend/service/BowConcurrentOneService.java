@@ -71,7 +71,6 @@ public class BowConcurrentOneService extends RecursiveTask<HashMap<String, Integ
         ForkJoinPool pool = new ForkJoinPool();
         HashMap<String, Integer> bagOfWords = pool.invoke(bowTask);
         List<ThreadMetricsDTO> threadMetricsDTOList = new ArrayList<>();
-        long startTime = System.currentTimeMillis();
         long longestThreadTimeInMs = 0;
         for (String threadName : threadNameToExecutionTimesMap.keySet()) {
             long timeInMs = threadNameToExecutionTimesMap.get(threadName);
@@ -80,11 +79,9 @@ public class BowConcurrentOneService extends RecursiveTask<HashMap<String, Integ
             );
             longestThreadTimeInMs = Math.max(longestThreadTimeInMs, timeInMs);
         }
-        long endTime = System.currentTimeMillis();
-        long combinedTime = longestThreadTimeInMs + endTime - startTime;
         return BowResultDTO.builder()
                 .strategyType(Constant.CONCURRENT_ONE)
-                .executionTimeInMs(combinedTime)
+                .executionTimeInMs(longestThreadTimeInMs)
                 .bagOfWords(bagOfWords)
                 .threadMetricsDTOList(threadMetricsDTOList)
                 .build();
