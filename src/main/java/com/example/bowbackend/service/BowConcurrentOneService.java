@@ -28,30 +28,23 @@ public class BowConcurrentOneService extends RecursiveTask<HashMap<String, Integ
     @Override
     protected HashMap<String, Integer> compute() {
         long startTime = System.currentTimeMillis();
-        try {
-            if ((end - start) <= LIMIT) {
-                return computeDirectly();
-            } else {
-                int mid = start + ((end - start) / 2);
-                BowConcurrentOneService left = new BowConcurrentOneService(words, start, mid);
-                BowConcurrentOneService right = new BowConcurrentOneService(words, mid, end);
+        if ((end - start) <= LIMIT) {
+            return computeDirectly();
+        } else {
+            int mid = start + ((end - start) / 2);
+            BowConcurrentOneService left = new BowConcurrentOneService(words, start, mid);
+            BowConcurrentOneService right = new BowConcurrentOneService(words, mid, end);
 
-                left.fork();
-                right.fork();
-                HashMap<String, Integer> leftResult = left.join();
-                HashMap<String, Integer> rightResult = right.join();
+            left.fork();
+            right.fork();
+            HashMap<String, Integer> leftResult = left.join();
+            HashMap<String, Integer> rightResult = right.join();
 
-                mergeBowMaps(leftResult, rightResult);
-
-                return leftResult;
-            }
-        } finally
-
-        {
+            mergeBowMaps(leftResult, rightResult);
             long endTime = System.currentTimeMillis();
             String threadName = Thread.currentThread().getName();
-            long elapsedTime = endTime - startTime;
-            threadNameToExecutionTimesMap.merge(threadName, elapsedTime, Long::sum);
+            threadNameToExecutionTimesMap.merge(threadName, endTime - startTime, Math::max);
+            return leftResult;
         }
     }
 
@@ -80,11 +73,11 @@ public class BowConcurrentOneService extends RecursiveTask<HashMap<String, Integ
         List<ThreadMetricsDTO> threadMetricsDTOList = new ArrayList<>();
         long longestThreadTimeInMs = 0;
         for (String threadName : threadNameToExecutionTimesMap.keySet()) {
-        long timeInMs = threadNameToExecutionTimesMap.get(threadName);
-        threadMetricsDTOList.add(
-        new ThreadMetricsDTO(threadName, timeInMs)
-        );
-        longestThreadTimeInMs = Math.max(longestThreadTimeInMs, timeInMs);
+            long timeInMs = threadNameToExecutionTimesMap.get(threadName);
+            threadMetricsDTOList.add(
+                    new ThreadMetricsDTO(threadName, timeInMs)
+            );
+            longestThreadTimeInMs = Math.max(longestThreadTimeInMs, timeInMs);
         }
         return BowResultDTO.builder()
                 .strategyType(Constant.CONCURRENT_ONE)
