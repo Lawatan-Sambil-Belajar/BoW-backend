@@ -1,5 +1,7 @@
 package com.example.bowbackend.controller;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -8,14 +10,11 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.example.bowbackend.constant.Constant;
 import com.example.bowbackend.dto.BowResultDTO;
 import com.example.bowbackend.helper.TextFileToWordExtractor;
 import com.example.bowbackend.service.BowConcurrentOneService;
 import com.example.bowbackend.service.BowConcurrentTwoService;
 import com.example.bowbackend.service.BowSequentialService;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/bow")

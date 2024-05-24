@@ -1,37 +1,40 @@
 package com.example.bowbackend.service;
 
-import com.example.bowbackend.constant.Constant;
-import com.example.bowbackend.dto.BowResultDTO;
-import com.example.bowbackend.dto.ThreadMetricsDTO;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveTask;
 
-public class BowConcurrentOneService extends RecursiveTask<HashMap<String, Integer>> {
+import com.example.bowbackend.constant.Constant;
+import com.example.bowbackend.dto.BowResultDTO;
+import com.example.bowbackend.dto.ThreadMetricsDTO;
 
+public class BowConcurrentOneService extends RecursiveTask<HashMap<String, Integer>> {
     private final String[] words;
-    private static final int LIMIT = 1000000;
+    private static final int LIMIT = 10000;
+    private int start;
+    private int end;
     private static final ConcurrentHashMap<String, Long> threadNameToExecutionTimesMap = new ConcurrentHashMap<>();
 
-    public BowConcurrentOneService(String[] words) {
+    public BowConcurrentOneService(String[] words, int start, int end) {
         this.words = words;
+        this.start = start;
+        this.end = end;
     }
 
     @Override
     protected HashMap<String, Integer> compute() {
         long startTime = System.currentTimeMillis();
         try {
-            if (words.length <= LIMIT) {
+            if ((end - start) <= LIMIT) {
                 return computeDirectly();
             } else {
-                int mid = words.length / 2;
-
-                String[] leftArr = Arrays.copyOfRange(words, 0, mid);
-                String[] rightArr = Arrays.copyOfRange(words, mid, words.length);
-                BowConcurrentOneService left = new BowConcurrentOneService(leftArr);
-                BowConcurrentOneService right = new BowConcurrentOneService(rightArr);
+                int mid = start + ((end - start) / 2);
+                BowConcurrentOneService left = new BowConcurrentOneService(words, start, mid);
+                BowConcurrentOneService right = new BowConcurrentOneService(words, mid, end);
 
                 left.fork();
                 right.fork();
@@ -42,7 +45,9 @@ public class BowConcurrentOneService extends RecursiveTask<HashMap<String, Integ
 
                 return leftResult;
             }
-        } finally {
+        } finally
+
+        {
             long endTime = System.currentTimeMillis();
             String threadName = Thread.currentThread().getName();
             long elapsedTime = endTime - startTime;
@@ -53,8 +58,8 @@ public class BowConcurrentOneService extends RecursiveTask<HashMap<String, Integ
     private HashMap<String, Integer> computeDirectly() {
         HashMap<String, Integer> bagOfWords = new HashMap<>();
 
-        for (String word : words) {
-            bagOfWords.put(word, bagOfWords.getOrDefault(word, 0) + 1);
+        for (int i = start; i < end; i++) {
+            bagOfWords.put(words[i], bagOfWords.getOrDefault(words[i], 0) + 1);
         }
 
         return bagOfWords;
@@ -67,24 +72,25 @@ public class BowConcurrentOneService extends RecursiveTask<HashMap<String, Integ
     }
 
     public static BowResultDTO executeBowConcurrentOne(String[] words) {
-        BowConcurrentOneService bowTask = new BowConcurrentOneService(words);
+        BowConcurrentOneService bowTask = new BowConcurrentOneService(words, 0, words.length);
         ForkJoinPool pool = new ForkJoinPool();
+        long startTime = System.currentTimeMillis();
         HashMap<String, Integer> bagOfWords = pool.invoke(bowTask);
+        long endTime = System.currentTimeMillis();
         List<ThreadMetricsDTO> threadMetricsDTOList = new ArrayList<>();
         long longestThreadTimeInMs = 0;
         for (String threadName : threadNameToExecutionTimesMap.keySet()) {
-            long timeInMs = threadNameToExecutionTimesMap.get(threadName);
-            threadMetricsDTOList.add(
-                    new ThreadMetricsDTO(threadName, timeInMs)
-            );
-            longestThreadTimeInMs = Math.max(longestThreadTimeInMs, timeInMs);
+        long timeInMs = threadNameToExecutionTimesMap.get(threadName);
+        threadMetricsDTOList.add(
+        new ThreadMetricsDTO(threadName, timeInMs)
+        );
+        longestThreadTimeInMs = Math.max(longestThreadTimeInMs, timeInMs);
         }
         return BowResultDTO.builder()
                 .strategyType(Constant.CONCURRENT_ONE)
-                .executionTimeInMs(longestThreadTimeInMs)
+                .executionTimeInMs(endTime - startTime)
                 .bagOfWords(bagOfWords)
                 .threadMetricsDTOList(threadMetricsDTOList)
                 .build();
     }
 }
-
