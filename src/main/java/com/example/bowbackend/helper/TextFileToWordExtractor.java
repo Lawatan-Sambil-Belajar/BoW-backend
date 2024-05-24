@@ -13,6 +13,9 @@ import org.springframework.web.multipart.MultipartFile;
 public class TextFileToWordExtractor {
 
     public static String[] extractToWords(MultipartFile textFile) {
+        if (!isTextFile(textFile)) {
+            return new String[]{};
+        }
         StringBuilder sb = new StringBuilder();
         try {
             BufferedReader br = new BufferedReader(new InputStreamReader(textFile.getInputStream(), StandardCharsets.UTF_8));
@@ -32,5 +35,10 @@ public class TextFileToWordExtractor {
         wordsList.removeAll(Arrays.asList("", null));
         words = wordsList.toArray(new String[0]);
         return words;
+    }
+
+    private static boolean isTextFile(MultipartFile textFile) {
+        return textFile != null && textFile.getOriginalFilename() != null
+                && textFile.getOriginalFilename().endsWith(".txt");
     }
 }
