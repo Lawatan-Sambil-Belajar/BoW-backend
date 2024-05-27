@@ -17,6 +17,7 @@ public class BowConcurrentTwoService {
     private static final ConcurrentHashMap<String, Long> threadNameToExecutionTimesMap = new ConcurrentHashMap<>();
 
     public static BowResultDTO executeBowConcurrentTwo(String[] words) {
+        threadNameToExecutionTimesMap.clear();
         int processors = Runtime.getRuntime().availableProcessors();
         int chunkSize = (words.length + processors - 1) / processors;
 

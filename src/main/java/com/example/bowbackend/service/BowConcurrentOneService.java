@@ -65,6 +65,7 @@ public class BowConcurrentOneService extends RecursiveTask<HashMap<String, Integ
     }
 
     public static BowResultDTO executeBowConcurrentOne(String[] words) {
+        threadNameToExecutionTimesMap.clear();
         BowConcurrentOneService bowTask = new BowConcurrentOneService(words, 0, words.length);
         ForkJoinPool pool = new ForkJoinPool();
         long startTime = System.currentTimeMillis();
