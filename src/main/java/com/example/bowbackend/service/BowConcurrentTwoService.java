@@ -49,15 +49,13 @@ public class BowConcurrentTwoService {
 
         long endTime = System.currentTimeMillis();
         List<ThreadMetricsDTO> threadMetricsDTOList = new ArrayList<>();
-        long longestThreadTimeInMs = 0;
         for (String threadName : threadNameToExecutionTimesMap.keySet()) {
             long timeInMs = threadNameToExecutionTimesMap.get(threadName);
             threadMetricsDTOList.add(
                     new ThreadMetricsDTO(threadName, timeInMs)
             );
-            longestThreadTimeInMs = Math.max(longestThreadTimeInMs, timeInMs);
         }
-        long combinedTime = longestThreadTimeInMs + endTime - startTime;
+        long combinedTime = endTime - startTime;
         return BowResultDTO.builder()
                 .strategyType(Constant.CONCURRENT_TWO)
                 .executionTimeInMs(combinedTime)
@@ -73,7 +71,7 @@ public class BowConcurrentTwoService {
             frequencyMap.merge(chunk[i], 1, Integer::sum);
         }
         long endTime = System.currentTimeMillis();
-        String threadName = Thread.currentThread().getName();
+        String threadName = Long.toString(Thread.currentThread().getId());
         long elapsedTime = endTime - startTime;
         threadNameToExecutionTimesMap.merge(threadName, elapsedTime, Long::sum);
         return frequencyMap;
