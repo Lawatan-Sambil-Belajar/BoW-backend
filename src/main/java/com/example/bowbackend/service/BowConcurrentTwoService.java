@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
 
 import com.example.bowbackend.constant.Constant;
 import com.example.bowbackend.dto.BowResultDTO;
@@ -21,31 +20,22 @@ public class BowConcurrentTwoService {
         int processors = Runtime.getRuntime().availableProcessors();
         int chunkSize = (words.length + processors - 1) / processors;
 
-        List<CompletableFuture<Map<String, Integer>>> futures = new ArrayList<>();
+        Map<String, Integer> finalBagOfWords = new ConcurrentHashMap<>();
+        List<CompletableFuture<Void>> futures = new ArrayList<>();
 
         for (int i = 0; i < words.length; i += chunkSize) {
             int start = i;
             int end = Math.min(i + chunkSize, words.length);
 
-            CompletableFuture<Map<String, Integer>> future = CompletableFuture
-                    .supplyAsync(() -> processChunk(words, start, end));
+            CompletableFuture<Void> future = CompletableFuture.supplyAsync(() -> processChunk(words, start, end))
+                    .thenAccept((Map<String, Integer> partialResult) -> partialResult
+                            .forEach((word, count) -> finalBagOfWords.merge(word, count, Integer::sum)));
             futures.add(future);
         }
 
         long startTime = System.currentTimeMillis();
         CompletableFuture<Void> allDone = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
         allDone.join();
-
-        Map<String, Integer> finalBagOfWords = new HashMap<>();
-        for (CompletableFuture<Map<String, Integer>> future : futures) {
-            try {
-                Map<String, Integer> partialResult = future.get();
-                partialResult.forEach((word, count) -> finalBagOfWords.merge(word, count, Integer::sum));
-            } catch (InterruptedException | ExecutionException e) {
-                throw new RuntimeException(e);
-            }
-
-        }
 
         long endTime = System.currentTimeMillis();
         List<ThreadMetricsDTO> threadMetricsDTOList = new ArrayList<>();
