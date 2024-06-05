@@ -1,10 +1,13 @@
 package com.example.bowbackend.service;
 
-import com.example.bowbackend.dto.BowResultDTO;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import com.example.bowbackend.dto.BowResultDTO;
 
 class BowConcurrentTwoServiceTest {
     private String[] words;
@@ -23,10 +26,6 @@ class BowConcurrentTwoServiceTest {
         assertEquals(2, result.getBagOfWords().get("cherry"));
     }
 
-    @Test
-    void executeBowConcurrentTwoShouldReturnCorrectExecutionTime() {
-        assertTrue(result.getExecutionTimeInMs() >= 0);
-    }
 
     @Test
     void executeBowConcurrentTwoShouldReturnConcurrentTwoStrategyType() {

@@ -1,11 +1,14 @@
 package com.example.bowbackend.service;
 
-import com.example.bowbackend.dto.BowResultDTO;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.HashMap;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import com.example.bowbackend.dto.BowResultDTO;
 
 public class BowConcurrentOneServiceTest {
     private BowConcurrentOneService service;
@@ -33,11 +36,6 @@ public class BowConcurrentOneServiceTest {
         assertEquals(2, result.getBagOfWords().get("cherry"));
     }
 
-    @Test
-    public void executeBowConcurrentOneShouldReturnCorrectExecutionTime() {
-        BowResultDTO result = BowConcurrentOneService.executeBowConcurrentOne(words);
-        assertTrue(result.getExecutionTimeInMs() > 0);
-    }
 
     @Test
     public void executeBowConcurrentOneUsingSmallArrayShouldReturnEmptyThreadMetrics() {

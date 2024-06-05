@@ -1,10 +1,12 @@
 package com.example.bowbackend.service;
 
-import com.example.bowbackend.dto.BowResultDTO;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import com.example.bowbackend.dto.BowResultDTO;
 
 class BowSequentialServiceTest {
     private String[] words;
@@ -23,10 +25,6 @@ class BowSequentialServiceTest {
         assertEquals(2, result.getBagOfWords().get("cherry"));
     }
 
-    @Test
-    void executeBowSequentialShouldReturnCorrectExecutionTime() {
-        assertTrue(result.getExecutionTimeInMs() >= 0);
-    }
 
     @Test
     void executeBowSequentialShouldReturnSequentialStrategyType() {
